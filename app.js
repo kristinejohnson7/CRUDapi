@@ -43,21 +43,18 @@ const alphabetizeStudentsLastName = (arr, order) => {
   }
 };
 
-const requiredFields = ["firstName", "lastName", "grade", "classes"];
-
 //CREATE METHODS
 
 //New student
 app.post("/students/add", (req, res) => {
   const students = getStudentData();
-  console.log(students);
-
-  if (
-    !req.body.firstName ||
-    !req.body.lastName ||
-    !req.body.grade ||
-    !req.body.classes
-  ) {
+  const requiredFields = [
+    req.body.firstName,
+    req.body.lastName,
+    req.body.grade,
+    req.body.classes,
+  ];
+  if (requiredFields.some((field) => field == undefined)) {
     return res
       .status(401)
       .send({ error: true, message: "Student data missing information" });
@@ -99,9 +96,8 @@ app.get("/students", (req, res) => {
 //Get classes for a student
 app.get("/students/classes/:id", (req, res) => {
   const students = getStudentData();
-  const found = students.find(
-    (student) => student.id == parseInt(req.params.id)
-  );
+  const found = students.find((student) => student.id == req.params.id);
+
   if (found) {
     res.status(200).json(found.classes);
   } else {
@@ -114,9 +110,7 @@ app.get("/students/classes/:id", (req, res) => {
 //update student profile
 app.put("/student/:id", (req, res) => {
   const students = getStudentData();
-  const found = students.find(
-    (student) => student.id === parseInt(req.params.id)
-  );
+  const found = students.find((student) => student.id === req.params.id);
 
   if (found) {
     const updated = {
@@ -126,7 +120,7 @@ app.put("/student/:id", (req, res) => {
       createdOn: req.body.createdOn || found.createdOn,
       updatedOn: new Date(),
       grade: req.body.grade || found.grade,
-      classes: req.body.classes || found.classes,
+      classes: found.classes,
     };
     const targetIndex = students.indexOf(found);
     students.splice(targetIndex, 1, updated);
@@ -137,6 +131,7 @@ app.put("/student/:id", (req, res) => {
   }
 });
 
+//update classes
 app.put("/student/classes/:id", (req, res) => {
   const students = getStudentData();
   let studentIndex = 0;
@@ -165,7 +160,7 @@ app.put("/student/classes/:id", (req, res) => {
 //delete student
 app.delete("/students/:id", (req, res) => {
   const students = getStudentData();
-  const id = parseInt(req.params.id);
+  const id = req.params.id;
 
   const filteredStudents = students.filter((student) => student.id !== id);
 
@@ -178,7 +173,7 @@ app.delete("/students/:id", (req, res) => {
   res.send({ success: true, message: "Student deleted successfully" });
 });
 
-//delete class
+//delete classes
 app.delete("/students/classes/:id", (req, res) => {
   const { className } = req.query;
   const students = getStudentData();
