@@ -23,24 +23,17 @@ const generateUniqueId = () => {
 };
 
 const alphabetizeStudentsLastName = (arr, order) => {
-  if (order === "asc") {
-    return arr.sort((a, b) =>
-      a.lastName.toLowerCase() < b.lastName.toLowerCase()
+  return arr.sort((a, b) =>
+    a.lastName.toLowerCase() < b.lastName.toLowerCase()
+      ? order === "asc"
         ? -1
-        : b.lastName.toLowerCase() > a.lastName.toLowerCase()
+        : 1
+      : b.lastName.toLowerCase() > a.lastName.toLowerCase()
+      ? order === "desc"
         ? 1
-        : 0
-    );
-  }
-  if (order === "desc") {
-    return arr.sort((a, b) =>
-      a.lastName.toLowerCase() < b.lastName.toLowerCase()
-        ? 1
-        : b.lastName.toLowerCase() > a.lastName.toLowerCase()
-        ? -1
-        : 0
-    );
-  }
+        : -1
+      : 0
+  );
 };
 
 //CREATE METHODS
@@ -81,11 +74,8 @@ app.post("/students/add", (req, res) => {
 app.get("/students", (req, res) => {
   let students = getStudentData();
   const { sort, limit } = req.query;
-  if (sort === "asc") {
-    students = alphabetizeStudentsLastName(students, "asc");
-  }
-  if (sort === "desc") {
-    students = alphabetizeStudentsLastName(students, "desc");
+  if (sort === "asc" || sort === "desc") {
+    students = alphabetizeStudentsLastName(students, sort);
   }
   if (!!limit) {
     students.splice(limit);
